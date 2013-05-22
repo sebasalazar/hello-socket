@@ -17,3 +17,4 @@
 *.app
 /nbproject/
 /dist/
+/build/

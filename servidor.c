@@ -7,11 +7,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <strings.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-void error(const char *msg);
+#include "error_socket.h"
+
+
 
 int main(int argc, char** argv) {
 
@@ -46,11 +49,13 @@ int main(int argc, char** argv) {
     if (nuevo_socket < 0) {
         error("ERROR al aceptar");
     }
-    bzero(buffer, 256);
-    n = read(nuevo_socket, buffer, 255);
+    
+    bzero(buffer, 512);
+    n = read(nuevo_socket, buffer, 511);
     if (n < 0) {
         error("ERROR al leer desde el socket");
     }
+    
     printf("Mensaje: %s a las %s %s\n", buffer, __DATE__, __TIME__);
     n = write(nuevo_socket, "recibi el mensaje", 18);
     if (n < 0) {
@@ -62,7 +67,3 @@ int main(int argc, char** argv) {
     return (EXIT_SUCCESS);
 }
 
-void error(const char *msg) {
-    perror(msg);
-    exit(1);
-}
