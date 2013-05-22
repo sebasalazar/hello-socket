@@ -8,13 +8,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <strings.h>
+#include <string.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
 #include <netinet/in.h>
 
 #include "error_socket.h"
-
-
 
 int main(int argc, char** argv) {
 
@@ -45,23 +44,32 @@ int main(int argc, char** argv) {
     listen(descriptor, 5);
     clilen = sizeof (cli_addr);
 
-    nuevo_socket = accept(descriptor, (struct sockaddr *) &cli_addr, &clilen);
-    if (nuevo_socket < 0) {
-        error("ERROR al aceptar");
+    while (1 == 1) {
+
+        nuevo_socket = accept(descriptor, (struct sockaddr *) &cli_addr, &clilen);
+        if (nuevo_socket < 0) {
+            error("ERROR al aceptar");
+        }
+
+
+        bzero(buffer, 512);
+        n = read(nuevo_socket, buffer, 511);
+        if (n < 0) {
+            error("ERROR al leer desde el socket");
+        }
+
+        char respuesta[1024];
+        bzero(respuesta, 1024);
+        sprintf(respuesta, "Mensaje: %s # Fecha: %s # Hora: %s\n", buffer, __DATE__, __TIME__);
+        printf(respuesta);
+
+
+        n = write(nuevo_socket, respuesta, strlen(respuesta));
+        if (n < 0) {
+            error("ERROR al escribir en socket");
+        }
+        close(nuevo_socket);
     }
-    
-    bzero(buffer, 512);
-    n = read(nuevo_socket, buffer, 511);
-    if (n < 0) {
-        error("ERROR al leer desde el socket");
-    }
-    
-    printf("Mensaje: %s a las %s %s\n", buffer, __DATE__, __TIME__);
-    n = write(nuevo_socket, "recibi el mensaje", 18);
-    if (n < 0) {
-        error("ERROR al escribir en socket");
-    }
-    close(nuevo_socket);
     close(descriptor);
 
     return (EXIT_SUCCESS);
